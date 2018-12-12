@@ -214,11 +214,20 @@ class BaseAdminObject(object):
 
     def vendor(self, *tags):
         return vendor(*tags)
+    
+    def get_client_ip(request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[-1].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
     def log(self, flag, message, obj=None):
         log = Log(
             user=self.user, 
-            ip_addr=self.request.META['REMOTE_ADDR'],
+            # ip_addr=self.request.META['REMOTE_ADDR'], #这是原来的
+            ip_addr=get_client_ip(self.request),  #这是修改后的
             action_flag=flag,
             message=message
         )
